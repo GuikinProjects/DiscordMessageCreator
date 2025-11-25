@@ -33,6 +33,7 @@ export function MessageBlockEditor({
   const [embedDialogOpen, setEmbedDialogOpen] = useState(false)
   const [localContent, setLocalContent] = useState(block.data.content || '')
   const [localImageUrl, setLocalImageUrl] = useState(block.data.imageUrl || '')
+  const [isDragging, setIsDragging] = useState(false)
   const contentTimeoutRef = useRef<NodeJS.Timeout>()
   const imageTimeoutRef = useRef<NodeJS.Timeout>()
 
@@ -291,13 +292,27 @@ export function MessageBlockEditor({
     image: 'Image',
   }
 
+  const handleDragStart = (e: React.DragEvent) => {
+    setIsDragging(true)
+    if (onDragStart) {
+      onDragStart(e)
+    }
+  }
+
+  const handleDragEnd = () => {
+    setIsDragging(false)
+    if (onDragEnd) {
+      onDragEnd()
+    }
+  }
+
   return (
     <>
       <Card 
-        className="p-4 bg-card cursor-move hover:border-primary/50 transition-all"
+        className={`p-4 bg-card cursor-move hover:border-primary/50 transition-all ${isDragging ? 'opacity-50 border-primary' : ''}`}
         draggable
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between">
