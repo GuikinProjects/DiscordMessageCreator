@@ -1,24 +1,35 @@
-import { MessageBlock, Author, Embed, Reply } from '@/lib/types'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Trash, DotsSixVertical, ArrowBendUpLeft, X } from '@phosphor-icons/react'
-import { EmbedDialog } from './EmbedDialog'
-import { useState, useEffect, useRef } from 'react'
+import { MessageBlock, Author, Embed, Reply } from "@/lib/types";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Trash,
+  DotsSixVertical,
+  ArrowBendUpLeft,
+  X,
+} from "@phosphor-icons/react";
+import { EmbedDialog } from "./EmbedDialog";
+import { useState, useEffect, useRef } from "react";
 
 interface MessageBlockEditorProps {
-  block: MessageBlock
-  authors: Author[]
-  onUpdate: (block: MessageBlock) => void
-  onDelete: () => void
-  onOpenAuthorDialog: () => void
-  onDragStart?: (e: React.DragEvent) => void
-  onDragEnd?: () => void
+  block: MessageBlock;
+  authors: Author[];
+  onUpdate: (block: MessageBlock) => void;
+  onDelete: () => void;
+  onOpenAuthorDialog: () => void;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: () => void;
 }
 
 export function MessageBlockEditor({
@@ -30,20 +41,20 @@ export function MessageBlockEditor({
   onDragStart,
   onDragEnd,
 }: MessageBlockEditorProps) {
-  const [embedDialogOpen, setEmbedDialogOpen] = useState(false)
-  const [localContent, setLocalContent] = useState(block.data.content || '')
-  const [localImageUrl, setLocalImageUrl] = useState(block.data.imageUrl || '')
-  const [isDragging, setIsDragging] = useState(false)
-  const contentTimeoutRef = useRef<NodeJS.Timeout>()
-  const imageTimeoutRef = useRef<NodeJS.Timeout>()
+  const [embedDialogOpen, setEmbedDialogOpen] = useState(false);
+  const [localContent, setLocalContent] = useState(block.data.content || "");
+  const [localImageUrl, setLocalImageUrl] = useState(block.data.imageUrl || "");
+  const [isDragging, setIsDragging] = useState(false);
+  const contentTimeoutRef = useRef<NodeJS.Timeout>();
+  const imageTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    setLocalContent(block.data.content || '')
-  }, [block.id])
+    setLocalContent(block.data.content || "");
+  }, [block.id]);
 
   useEffect(() => {
-    setLocalImageUrl(block.data.imageUrl || '')
-  }, [block.id])
+    setLocalImageUrl(block.data.imageUrl || "");
+  }, [block.id]);
 
   const handleDataChange = (key: string, value: any) => {
     onUpdate({
@@ -52,45 +63,45 @@ export function MessageBlockEditor({
         ...block.data,
         [key]: value,
       },
-    })
-  }
+    });
+  };
 
   const handleContentChange = (value: string) => {
-    setLocalContent(value)
-    
+    setLocalContent(value);
+
     if (contentTimeoutRef.current) {
-      clearTimeout(contentTimeoutRef.current)
+      clearTimeout(contentTimeoutRef.current);
     }
-    
+
     contentTimeoutRef.current = setTimeout(() => {
-      handleDataChange('content', value)
-    }, 300)
-  }
+      handleDataChange("content", value);
+    }, 300);
+  };
 
   const handleImageUrlChange = (value: string) => {
-    setLocalImageUrl(value)
-    
+    setLocalImageUrl(value);
+
     if (imageTimeoutRef.current) {
-      clearTimeout(imageTimeoutRef.current)
+      clearTimeout(imageTimeoutRef.current);
     }
-    
+
     imageTimeoutRef.current = setTimeout(() => {
-      handleDataChange('imageUrl', value)
-    }, 500)
-  }
+      handleDataChange("imageUrl", value);
+    }, 500);
+  };
 
   const handleSaveEmbed = (embed: Embed) => {
-    handleDataChange('embed', embed)
-  }
+    handleDataChange("embed", embed);
+  };
 
   const renderEditor = () => {
     switch (block.type) {
-      case 'author':
+      case "author":
         return (
           <div className="space-y-2">
             <Select
-              value={block.data.authorId || ''}
-              onValueChange={(value) => handleDataChange('authorId', value)}
+              value={block.data.authorId || ""}
+              onValueChange={(value) => handleDataChange("authorId", value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select an author" />
@@ -106,7 +117,9 @@ export function MessageBlockEditor({
                           className="w-5 h-5 rounded-full"
                         />
                       )}
-                      <span style={{ color: author.roleColor }}>{author.username}</span>
+                      <span style={{ color: author.roleColor }}>
+                        {author.username}
+                      </span>
                       {author.isBot && (
                         <Badge variant="secondary" className="text-xs">
                           BOT
@@ -128,9 +141,9 @@ export function MessageBlockEditor({
               </Button>
             )}
           </div>
-        )
+        );
 
-      case 'message':
+      case "message":
         return (
           <div className="space-y-3">
             {/* Reply section */}
@@ -138,7 +151,9 @@ export function MessageBlockEditor({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleDataChange('reply', { authorId: '', content: '' })}
+                onClick={() =>
+                  handleDataChange("reply", { authorId: "", content: "" })
+                }
                 className="w-full"
               >
                 <ArrowBendUpLeft className="mr-2" size={16} />
@@ -152,16 +167,19 @@ export function MessageBlockEditor({
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6"
-                    onClick={() => handleDataChange('reply', undefined)}
+                    onClick={() => handleDataChange("reply", undefined)}
                   >
                     <X size={14} />
                   </Button>
                 </div>
-                
+
                 <Select
-                  value={block.data.reply.authorId || ''}
+                  value={block.data.reply.authorId || ""}
                   onValueChange={(value) =>
-                    handleDataChange('reply', { ...block.data.reply, authorId: value })
+                    handleDataChange("reply", {
+                      ...block.data.reply,
+                      authorId: value,
+                    })
                   }
                 >
                   <SelectTrigger className="h-8">
@@ -178,28 +196,36 @@ export function MessageBlockEditor({
                               className="w-4 h-4 rounded-full"
                             />
                           )}
-                          <span style={{ color: author.roleColor }}>{author.username}</span>
+                          <span style={{ color: author.roleColor }}>
+                            {author.username}
+                          </span>
                         </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                
+
                 <Input
-                  value={block.data.reply.content || ''}
+                  value={block.data.reply.content || ""}
                   onChange={(e) =>
-                    handleDataChange('reply', { ...block.data.reply, content: e.target.value })
+                    handleDataChange("reply", {
+                      ...block.data.reply,
+                      content: e.target.value,
+                    })
                   }
                   placeholder="Original message content..."
                   className="h-8 text-sm"
                 />
-                
+
                 <div className="flex gap-4 text-xs">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <Checkbox
                       checked={block.data.reply.edited || false}
                       onCheckedChange={(checked) =>
-                        handleDataChange('reply', { ...block.data.reply, edited: checked })
+                        handleDataChange("reply", {
+                          ...block.data.reply,
+                          edited: checked,
+                        })
                       }
                     />
                     <span>Edited</span>
@@ -208,7 +234,10 @@ export function MessageBlockEditor({
                     <Checkbox
                       checked={block.data.reply.attachment || false}
                       onCheckedChange={(checked) =>
-                        handleDataChange('reply', { ...block.data.reply, attachment: checked })
+                        handleDataChange("reply", {
+                          ...block.data.reply,
+                          attachment: checked,
+                        })
                       }
                     />
                     <span>Has Attachment</span>
@@ -216,7 +245,7 @@ export function MessageBlockEditor({
                 </div>
               </div>
             )}
-            
+
             {/* Message content */}
             <Textarea
               value={localContent}
@@ -224,7 +253,7 @@ export function MessageBlockEditor({
               placeholder="Type your message... Discord markdown supported!"
               rows={3}
             />
-            
+
             <div className="flex items-center justify-between">
               {/* <p className="text-xs text-muted-foreground">
                 Supports: **bold**, *italic*, __underline__, ~~strikethrough~~, `code`
@@ -232,36 +261,43 @@ export function MessageBlockEditor({
               <label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox
                   checked={block.data.edited || false}
-                  onCheckedChange={(checked) => handleDataChange('edited', checked)}
+                  onCheckedChange={(checked) =>
+                    handleDataChange("edited", checked)
+                  }
                 />
                 <span className="text-sm">Edited</span>
               </label>
             </div>
           </div>
-        )
+        );
 
-      case 'embed':
+      case "embed":
         return (
           <div className="space-y-2">
             <Button
-              variant={block.data.embed ? 'secondary' : 'outline'}
+              variant={block.data.embed ? "secondary" : "outline"}
               onClick={() => setEmbedDialogOpen(true)}
               className="w-full"
             >
-              {block.data.embed ? 'Edit Embed' : 'Configure Embed'}
+              {block.data.embed ? "Edit Embed" : "Configure Embed"}
             </Button>
             {block.data.embed && (
               <div className="text-xs text-muted-foreground">
-                {block.data.embed.title && <div>Title: {block.data.embed.title}</div>}
+                {block.data.embed.title && (
+                  <div>Title: {block.data.embed.title}</div>
+                )}
                 {block.data.embed.description && (
-                  <div>Description: {block.data.embed.description.substring(0, 50)}...</div>
+                  <div>
+                    Description: {block.data.embed.description.substring(0, 50)}
+                    ...
+                  </div>
                 )}
               </div>
             )}
           </div>
-        )
+        );
 
-      case 'image':
+      case "image":
         return (
           <div className="space-y-2">
             <Input
@@ -275,41 +311,43 @@ export function MessageBlockEditor({
                 alt="Preview"
                 className="w-full rounded-md max-h-32 object-cover"
                 onError={(e) => {
-                  e.currentTarget.src = ''
-                  e.currentTarget.alt = 'Invalid image URL'
+                  e.currentTarget.src = "";
+                  e.currentTarget.alt = "Invalid image URL";
                 }}
               />
             )}
           </div>
-        )
+        );
     }
-  }
+  };
 
   const blockTypeLabels = {
-    author: 'Author',
-    message: 'Message',
-    embed: 'Embed',
-    image: 'Image',
-  }
+    author: "Author",
+    message: "Message",
+    embed: "Embed",
+    image: "Image",
+  };
 
   const handleDragStart = (e: React.DragEvent) => {
-    setIsDragging(true)
+    setIsDragging(true);
     if (onDragStart) {
-      onDragStart(e)
+      onDragStart(e);
     }
-  }
+  };
 
   const handleDragEnd = () => {
-    setIsDragging(false)
+    setIsDragging(false);
     if (onDragEnd) {
-      onDragEnd()
+      onDragEnd();
     }
-  }
+  };
 
   return (
     <>
-      <Card 
-        className={`p-4 bg-card cursor-move hover:border-primary/50 transition-all ${isDragging ? 'opacity-50 border-primary' : ''}`}
+      <Card
+        className={`p-4 bg-card cursor-move hover:border-primary/50 transition-all ${
+          isDragging ? "opacity-50 border-primary" : ""
+        }`}
         draggable
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -318,9 +356,15 @@ export function MessageBlockEditor({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="cursor-grab active:cursor-grabbing hover:text-primary transition-colors">
-                <DotsSixVertical className="text-muted-foreground" size={20} weight="bold" />
+                <DotsSixVertical
+                  className="text-muted-foreground"
+                  size={20}
+                  weight="bold"
+                />
               </div>
-              <span className="font-medium text-sm">{blockTypeLabels[block.type]}</span>
+              <span className="font-medium text-sm">
+                {blockTypeLabels[block.type]}
+              </span>
             </div>
             <Button variant="ghost" size="sm" onClick={onDelete}>
               <Trash className="text-destructive" />
@@ -330,7 +374,7 @@ export function MessageBlockEditor({
         </div>
       </Card>
 
-      {block.type === 'embed' && (
+      {block.type === "embed" && (
         <EmbedDialog
           open={embedDialogOpen}
           onOpenChange={setEmbedDialogOpen}
@@ -339,5 +383,5 @@ export function MessageBlockEditor({
         />
       )}
     </>
-  )
+  );
 }
