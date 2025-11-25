@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect } from "react";
 import {
   DiscordMessages,
   DiscordMessage,
@@ -7,18 +7,21 @@ import {
   DiscordEmbedField,
   DiscordAttachments,
   DiscordReply,
-} from '@skyra/discord-components-react'
-import { MessageBlock, Author } from '@/lib/types'
-import { parseDiscordMarkdown } from '@/lib/markdown'
+} from "@skyra/discord-components-react";
+import { MessageBlock, Author } from "@/lib/types";
+import { parseDiscordMarkdown } from "@/lib/markdown";
 
 interface ComposedMessagePreviewProps {
-  blocks: MessageBlock[]
-  authors: Author[]
+  blocks: MessageBlock[];
+  authors: Author[];
 }
 
-export function ComposedMessagePreview({ blocks, authors }: ComposedMessagePreviewProps) {
+export function ComposedMessagePreview({
+  blocks,
+  authors,
+}: ComposedMessagePreviewProps) {
   useEffect(() => {
-    const style = document.createElement('style')
+    const style = document.createElement("style");
     style.textContent = `
       discord-messages {
         background-color: #36393f;
@@ -116,53 +119,53 @@ export function ComposedMessagePreview({ blocks, authors }: ComposedMessagePrevi
       discord-message li {
         color: #dcddde;
       }
-    `
-    document.head.appendChild(style)
+    `;
+    document.head.appendChild(style);
 
     const handleSpoilerClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.classList.contains('spoiler')) {
-        target.style.backgroundColor = 'rgba(32, 34, 37, 0.6)'
-        target.style.color = '#dcddde'
+      const target = e.target as HTMLElement;
+      if (target.classList.contains("spoiler")) {
+        target.style.backgroundColor = "rgba(32, 34, 37, 0.6)";
+        target.style.color = "#dcddde";
       }
-    }
+    };
 
-    document.addEventListener('click', handleSpoilerClick)
+    document.addEventListener("click", handleSpoilerClick);
 
     return () => {
-      document.head.removeChild(style)
-      document.removeEventListener('click', handleSpoilerClick)
-    }
-  }, [])
+      document.head.removeChild(style);
+      document.removeEventListener("click", handleSpoilerClick);
+    };
+  }, []);
 
   const getAuthor = (authorId: string | undefined) => {
-    if (!authorId) return null
-    return authors.find((a) => a.id === authorId)
-  }
+    if (!authorId) return null;
+    return authors.find((a) => a.id === authorId);
+  };
 
   const groupedMessages: Array<{
-    author: Author
-    blocks: MessageBlock[]
-  }> = []
+    author: Author;
+    blocks: MessageBlock[];
+  }> = [];
 
-  let currentAuthor: Author | null = null
-  let currentBlocks: MessageBlock[] = []
+  let currentAuthor: Author | null = null;
+  let currentBlocks: MessageBlock[] = [];
 
   for (const block of blocks) {
-    if (block.type === 'author') {
+    if (block.type === "author") {
       if (currentAuthor && currentBlocks.length > 0) {
-        groupedMessages.push({ author: currentAuthor, blocks: currentBlocks })
-        currentBlocks = []
+        groupedMessages.push({ author: currentAuthor, blocks: currentBlocks });
+        currentBlocks = [];
       }
-      const author = getAuthor(block.data.authorId)
-      currentAuthor = author || null
+      const author = getAuthor(block.data.authorId);
+      currentAuthor = author || null;
     } else if (currentAuthor) {
-      currentBlocks.push(block)
+      currentBlocks.push(block);
     }
   }
 
   if (currentAuthor && currentBlocks.length > 0) {
-    groupedMessages.push({ author: currentAuthor, blocks: currentBlocks })
+    groupedMessages.push({ author: currentAuthor, blocks: currentBlocks });
   }
 
   if (groupedMessages.length === 0) {
@@ -174,28 +177,36 @@ export function ComposedMessagePreview({ blocks, authors }: ComposedMessagePrevi
           </div>
         </DiscordMessages>
       </div>
-    )
+    );
   }
 
   return (
     <div className="bg-[#36393f] rounded-lg overflow-hidden p-4">
       <DiscordMessages>
         {groupedMessages.map((group, groupIdx) => {
-          const messageBlocks = group.blocks.filter((b) => b.type === 'message')
+          const messageBlocks = group.blocks.filter(
+            (b) => b.type === "message"
+          );
           const messageContent = messageBlocks
             .filter((b) => b.data.content)
             .map((b) => b.data.content)
-            .join('\n')
+            .join("\n");
 
           // Get reply from the first message block that has one
-          const reply = messageBlocks.find((b) => b.data.reply)?.data.reply
-          const replyAuthor = reply ? authors.find((a) => a.id === reply.authorId) : null
+          const reply = messageBlocks.find((b) => b.data.reply)?.data.reply;
+          const replyAuthor = reply
+            ? authors.find((a) => a.id === reply.authorId)
+            : null;
 
           // Check if any message block is marked as edited
-          const isEdited = messageBlocks.some((b) => b.data.edited)
+          const isEdited = messageBlocks.some((b) => b.data.edited);
 
-          const embeds = group.blocks.filter((b) => b.type === 'embed' && b.data.embed)
-          const images = group.blocks.filter((b) => b.type === 'image' && b.data.imageUrl)
+          const embeds = group.blocks.filter(
+            (b) => b.type === "embed" && b.data.embed
+          );
+          const images = group.blocks.filter(
+            (b) => b.type === "image" && b.data.imageUrl
+          );
 
           return (
             <DiscordMessage
@@ -204,7 +215,7 @@ export function ComposedMessagePreview({ blocks, authors }: ComposedMessagePrevi
               avatar={group.author.avatar}
               roleColor={group.author.roleColor}
               bot={group.author.isBot}
-              verified={group.author.isBot ? true : undefined}
+              verified={group.author.verified}
               roleIcon={group.author.badgeUrl}
               edited={isEdited}
             >
@@ -217,19 +228,23 @@ export function ComposedMessagePreview({ blocks, authors }: ComposedMessagePrevi
                   bot={replyAuthor.isBot}
                   edited={reply.edited}
                   attachment={reply.attachment}
-                  style={{ marginLeft: '55px' }}
+                  style={{ marginLeft: "55px" }}
                 >
                   {reply.content}
                 </DiscordReply>
               )}
-              
+
               {messageContent && (
-                <span dangerouslySetInnerHTML={{ __html: parseDiscordMarkdown(messageContent) }} />
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: parseDiscordMarkdown(messageContent),
+                  }}
+                />
               )}
 
               {embeds.map((embedBlock) => {
-                const embed = embedBlock.data.embed
-                if (!embed) return null
+                const embed = embedBlock.data.embed;
+                if (!embed) return null;
 
                 return (
                   <DiscordEmbed
@@ -247,7 +262,9 @@ export function ComposedMessagePreview({ blocks, authors }: ComposedMessagePrevi
                     {embed.description && (
                       <div
                         slot="description"
-                        dangerouslySetInnerHTML={{ __html: parseDiscordMarkdown(embed.description) }}
+                        dangerouslySetInnerHTML={{
+                          __html: parseDiscordMarkdown(embed.description),
+                        }}
                       />
                     )}
                     {embed.fields && embed.fields.length > 0 && (
@@ -258,14 +275,20 @@ export function ComposedMessagePreview({ blocks, authors }: ComposedMessagePrevi
                             fieldTitle={field.name}
                             inline={field.inline}
                           >
-                            <span dangerouslySetInnerHTML={{ __html: parseDiscordMarkdown(field.value) }} />
+                            <span
+                              dangerouslySetInnerHTML={{
+                                __html: parseDiscordMarkdown(field.value),
+                              }}
+                            />
                           </DiscordEmbedField>
                         ))}
                       </DiscordEmbedFields>
                     )}
-                    {embed.footerText && <div slot="footer">{embed.footerText}</div>}
+                    {embed.footerText && (
+                      <div slot="footer">{embed.footerText}</div>
+                    )}
                   </DiscordEmbed>
-                )
+                );
               })}
 
               {images.length > 0 && (
@@ -281,9 +304,9 @@ export function ComposedMessagePreview({ blocks, authors }: ComposedMessagePrevi
                 </DiscordAttachments>
               )}
             </DiscordMessage>
-          )
+          );
         })}
       </DiscordMessages>
     </div>
-  )
+  );
 }

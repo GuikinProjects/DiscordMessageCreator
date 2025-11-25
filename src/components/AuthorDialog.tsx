@@ -1,43 +1,57 @@
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Author } from '@/lib/types'
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Author } from "@/lib/types";
 
 interface AuthorDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSave: (author: Author) => void
-  editingAuthor?: Author
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (author: Author) => void;
+  editingAuthor?: Author;
 }
 
-export function AuthorDialog({ open, onOpenChange, onSave, editingAuthor }: AuthorDialogProps) {
-  const [username, setUsername] = useState('')
-  const [avatar, setAvatar] = useState('')
-  const [roleColor, setRoleColor] = useState('#5865F2')
-  const [isBot, setIsBot] = useState(false)
-  const [badgeUrl, setBadgeUrl] = useState('')
+export function AuthorDialog({
+  open,
+  onOpenChange,
+  onSave,
+  editingAuthor,
+}: AuthorDialogProps) {
+  const [username, setUsername] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [roleColor, setRoleColor] = useState("#5865F2");
+  const [isBot, setIsBot] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [badgeUrl, setBadgeUrl] = useState("");
 
   useEffect(() => {
     if (editingAuthor) {
-      setUsername(editingAuthor.username)
-      setAvatar(editingAuthor.avatar || '')
-      setRoleColor(editingAuthor.roleColor || '#5865F2')
-      setIsBot(editingAuthor.isBot || false)
-      setBadgeUrl(editingAuthor.badgeUrl || '')
+      setUsername(editingAuthor.username);
+      setAvatar(editingAuthor.avatar || "");
+      setRoleColor(editingAuthor.roleColor || "#5865F2");
+      setIsBot(editingAuthor.isBot || false);
+      setVerified(editingAuthor.verified || false);
+      setBadgeUrl(editingAuthor.badgeUrl || "");
     } else {
-      setUsername('')
-      setAvatar('')
-      setRoleColor('#5865F2')
-      setIsBot(false)
-      setBadgeUrl('')
+      setUsername("");
+      setAvatar("");
+      setRoleColor("#5865F2");
+      setIsBot(false);
+      setVerified(false);
+      setBadgeUrl("");
     }
-  }, [editingAuthor, open])
+  }, [editingAuthor, open]);
 
   const handleSave = () => {
-    if (!username.trim()) return
+    if (!username.trim()) return;
 
     const author: Author = {
       id: editingAuthor?.id || Date.now().toString(),
@@ -45,18 +59,21 @@ export function AuthorDialog({ open, onOpenChange, onSave, editingAuthor }: Auth
       avatar: avatar.trim() || undefined,
       roleColor: roleColor,
       isBot,
+      verified: isBot ? verified : undefined,
       badgeUrl: badgeUrl.trim() || undefined,
-    }
+    };
 
-    onSave(author)
-    onOpenChange(false)
-  }
+    onSave(author);
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editingAuthor ? 'Edit Author' : 'Create New Author'}</DialogTitle>
+          <DialogTitle>
+            {editingAuthor ? "Edit Author" : "Create New Author"}
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
@@ -98,6 +115,16 @@ export function AuthorDialog({ open, onOpenChange, onSave, editingAuthor }: Auth
             <Label htmlFor="isBot">Bot Badge</Label>
             <Switch id="isBot" checked={isBot} onCheckedChange={setIsBot} />
           </div>
+          {isBot && (
+            <div className="flex items-center justify-between pl-4 border-l-2 border-primary/30">
+              <Label htmlFor="verified">Verified Bot</Label>
+              <Switch
+                id="verified"
+                checked={verified}
+                onCheckedChange={setVerified}
+              />
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="badgeUrl">Profile Badge URL (optional)</Label>
             <Input
@@ -121,5 +148,5 @@ export function AuthorDialog({ open, onOpenChange, onSave, editingAuthor }: Auth
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

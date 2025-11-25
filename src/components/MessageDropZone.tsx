@@ -207,11 +207,11 @@ export function MessageDropZone({
 
         {blocks.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed rounded-lg">
-            <Plus className="text-muted-foreground mb-2" size={48} />
+            <Plus className="mb-2 text-muted-foreground" size={48} />
             <p className="text-muted-foreground">
               Drag and drop items from the panel
             </p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="mt-1 text-sm text-muted-foreground">
               Start by adding an author, then message content
             </p>
           </div>
