@@ -7,7 +7,7 @@ const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname;
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
-	base: command === "build" ? "/DiscordMessageCreator/" : "/",
+	base: "/",
 	plugins: [react(), tailwindcss()],
 	resolve: {
 		alias: {
