@@ -6,6 +6,8 @@ export interface Author {
 	isBot?: boolean
 	verified?: boolean
 	badgeUrl?: string
+	showTimestamp?: boolean
+	customTimestamp?: string
 }
 
 export interface EmbedField {
@@ -59,6 +61,8 @@ export interface MessageBlock {
 		imageUrl?: string
 		reply?: Reply
 		edited?: boolean
+		showTimestamp?: boolean
+		customTimestamp?: string
 	}
 }
 

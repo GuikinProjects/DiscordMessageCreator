@@ -31,6 +31,8 @@ export function AuthorDialog({
   const [isBot, setIsBot] = useState(false);
   const [verified, setVerified] = useState(false);
   const [badgeUrl, setBadgeUrl] = useState("");
+  const [showTimestamp, setShowTimestamp] = useState(false);
+  const [customTimestamp, setCustomTimestamp] = useState("");
 
   useEffect(() => {
     if (editingAuthor) {
@@ -40,6 +42,8 @@ export function AuthorDialog({
       setIsBot(editingAuthor.isBot || false);
       setVerified(editingAuthor.verified || false);
       setBadgeUrl(editingAuthor.badgeUrl || "");
+      setShowTimestamp(editingAuthor.showTimestamp || false);
+      setCustomTimestamp(editingAuthor.customTimestamp || "");
     } else {
       setUsername("");
       setAvatar("");
@@ -47,6 +51,8 @@ export function AuthorDialog({
       setIsBot(false);
       setVerified(false);
       setBadgeUrl("");
+      setShowTimestamp(false);
+      setCustomTimestamp("");
     }
   }, [editingAuthor, open]);
 
@@ -61,6 +67,11 @@ export function AuthorDialog({
       isBot,
       verified: isBot ? verified : undefined,
       badgeUrl: badgeUrl.trim() || undefined,
+      showTimestamp,
+      customTimestamp:
+        showTimestamp && customTimestamp.trim()
+          ? customTimestamp.trim()
+          : undefined,
     };
 
     onSave(author);
@@ -123,6 +134,29 @@ export function AuthorDialog({
                 checked={verified}
                 onCheckedChange={setVerified}
               />
+            </div>
+          )}
+          <div className="flex items-center justify-between">
+            <Label htmlFor="showTimestamp">Show Timestamp</Label>
+            <Switch
+              id="showTimestamp"
+              checked={showTimestamp}
+              onCheckedChange={setShowTimestamp}
+            />
+          </div>
+          {showTimestamp && (
+            <div className="space-y-2 pl-4 border-l-2 border-primary/30">
+              <Label htmlFor="customTimestamp">Custom Timestamp</Label>
+              <Input
+                id="customTimestamp"
+                type="datetime-local"
+                value={customTimestamp}
+                onChange={(e) => setCustomTimestamp(e.target.value)}
+                placeholder="Select date and time"
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave empty to use current date/time format
+              </p>
             </div>
           )}
           <div className="space-y-2">

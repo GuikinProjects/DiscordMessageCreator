@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import {
   Trash,
   DotsSixVertical,
@@ -97,8 +98,11 @@ export function MessageBlockEditor({
   const renderEditor = () => {
     switch (block.type) {
       case "author":
+        const selectedAuthor = authors.find(
+          (a) => a.id === block.data.authorId
+        );
         return (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Select
               value={block.data.authorId || ""}
               onValueChange={(value) => handleDataChange("authorId", value)}
@@ -130,6 +134,57 @@ export function MessageBlockEditor({
                 ))}
               </SelectContent>
             </Select>
+
+            {selectedAuthor && (
+              <div className="p-3 space-y-3 border rounded-lg bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <Label
+                    htmlFor="showTimestamp"
+                    className="text-sm font-medium"
+                  >
+                    Show Timestamp
+                  </Label>
+                  <Switch
+                    id="showTimestamp"
+                    checked={
+                      (block.data.showTimestamp ??
+                        selectedAuthor?.showTimestamp ??
+                        false) as boolean
+                    }
+                    onCheckedChange={(checked) =>
+                      handleDataChange("showTimestamp", checked)
+                    }
+                  />
+                </div>
+
+                {(block.data.showTimestamp ??
+                  selectedAuthor?.showTimestamp) && (
+                  <div className="pl-3 space-y-2 border-l-2 border-primary/30">
+                    <Label htmlFor="customTimestamp" className="text-xs">
+                      Custom Timestamp
+                    </Label>
+                    <Input
+                      id="customTimestamp"
+                      type="datetime-local"
+                      value={
+                        block.data.customTimestamp ??
+                        selectedAuthor?.customTimestamp ??
+                        ""
+                      }
+                      onChange={(e) =>
+                        handleDataChange("customTimestamp", e.target.value)
+                      }
+                      placeholder="Select date and time"
+                      className="h-8 text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Leave empty for current date/time
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {authors.length === 0 && (
               <Button
                 variant="outline"
@@ -160,13 +215,13 @@ export function MessageBlockEditor({
                 Add Reply
               </Button>
             ) : (
-              <div className="border rounded-lg p-3 space-y-2 bg-muted/50">
+              <div className="p-3 space-y-2 border rounded-lg bg-muted/50">
                 <div className="flex items-center justify-between mb-2">
                   <Label className="text-xs font-semibold">Reply To</Label>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6"
+                    className="w-6 h-6"
                     onClick={() => handleDataChange("reply", undefined)}
                   >
                     <X size={14} />
@@ -309,7 +364,7 @@ export function MessageBlockEditor({
               <img
                 src={block.data.imageUrl}
                 alt="Preview"
-                className="w-full rounded-md max-h-32 object-cover"
+                className="object-cover w-full rounded-md max-h-32"
                 onError={(e) => {
                   e.currentTarget.src = "";
                   e.currentTarget.alt = "Invalid image URL";
@@ -355,14 +410,14 @@ export function MessageBlockEditor({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="cursor-grab active:cursor-grabbing hover:text-primary transition-colors">
+              <div className="transition-colors cursor-grab active:cursor-grabbing hover:text-primary">
                 <DotsSixVertical
                   className="text-muted-foreground"
                   size={20}
                   weight="bold"
                 />
               </div>
-              <span className="font-medium text-sm">
+              <span className="text-sm font-medium">
                 {blockTypeLabels[block.type]}
               </span>
             </div>

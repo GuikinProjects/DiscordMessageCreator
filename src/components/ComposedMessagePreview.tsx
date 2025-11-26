@@ -11,6 +11,23 @@ import {
 import { MessageBlock, Author } from "@/lib/types";
 import { parseDiscordMarkdown } from "@/lib/markdown";
 
+const formatTimestamp = (timestamp?: string) => {
+  const sanitized = timestamp?.trim();
+  const date = sanitized ? new Date(sanitized) : new Date();
+
+  if (Number.isNaN(date.getTime())) {
+    return sanitized ?? "";
+  }
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
+
 interface ComposedMessagePreviewProps {
   blocks: MessageBlock[];
   authors: Author[];
@@ -145,27 +162,38 @@ export function ComposedMessagePreview({
 
   const groupedMessages: Array<{
     author: Author;
+    authorBlock: MessageBlock;
     blocks: MessageBlock[];
   }> = [];
 
   let currentAuthor: Author | null = null;
+  let currentAuthorBlock: MessageBlock | null = null;
   let currentBlocks: MessageBlock[] = [];
 
   for (const block of blocks) {
     if (block.type === "author") {
-      if (currentAuthor && currentBlocks.length > 0) {
-        groupedMessages.push({ author: currentAuthor, blocks: currentBlocks });
+      if (currentAuthor && currentAuthorBlock && currentBlocks.length > 0) {
+        groupedMessages.push({
+          author: currentAuthor,
+          authorBlock: currentAuthorBlock,
+          blocks: currentBlocks,
+        });
         currentBlocks = [];
       }
       const author = getAuthor(block.data.authorId);
       currentAuthor = author || null;
+      currentAuthorBlock = author ? block : null;
     } else if (currentAuthor) {
       currentBlocks.push(block);
     }
   }
 
-  if (currentAuthor && currentBlocks.length > 0) {
-    groupedMessages.push({ author: currentAuthor, blocks: currentBlocks });
+  if (currentAuthor && currentAuthorBlock && currentBlocks.length > 0) {
+    groupedMessages.push({
+      author: currentAuthor,
+      authorBlock: currentAuthorBlock,
+      blocks: currentBlocks,
+    });
   }
 
   if (groupedMessages.length === 0) {
@@ -208,6 +236,17 @@ export function ComposedMessagePreview({
             (b) => b.type === "image" && b.data.imageUrl
           );
 
+          const showTimestamp = Boolean(
+            group.authorBlock.data.showTimestamp ?? group.author.showTimestamp
+          );
+          const customTimestamp =
+            group.authorBlock.data.customTimestamp ??
+            group.author.customTimestamp;
+
+          const messageTimestamp = showTimestamp
+            ? formatTimestamp(customTimestamp)
+            : "";
+
           return (
             <DiscordMessage
               key={groupIdx}
@@ -218,6 +257,7 @@ export function ComposedMessagePreview({
               verified={group.author.verified}
               roleIcon={group.author.badgeUrl}
               edited={isEdited}
+              timestamp={messageTimestamp}
             >
               {reply && replyAuthor && (
                 <DiscordReply
