@@ -1,24 +1,33 @@
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, User, PencilSimple, Trash } from '@phosphor-icons/react'
-import { Author } from '@/lib/types'
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Plus, User, PencilSimple, Trash } from "@phosphor-icons/react";
+import { Author } from "@/lib/types";
 
 interface AuthorsPanelProps {
-  authors: Author[]
-  onAddAuthor: () => void
-  onEditAuthor: (author: Author) => void
-  onDeleteAuthor: (id: string) => void
+  authors: Author[];
+  onAddAuthor: () => void;
+  onEditAuthor: (author: Author) => void;
+  onDeleteAuthor: (id: string) => void;
 }
 
-export function AuthorsPanel({ authors, onAddAuthor, onEditAuthor, onDeleteAuthor }: AuthorsPanelProps) {
+export function AuthorsPanel({
+  authors,
+  onAddAuthor,
+  onEditAuthor,
+  onDeleteAuthor,
+}: AuthorsPanelProps) {
   return (
     <Card className="p-4 bg-[#2f3136] border-[#202225]">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">Authors</h3>
-          <Button onClick={onAddAuthor} size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">
+          <Button
+            onClick={onAddAuthor}
+            size="sm"
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
             <Plus className="mr-1" size={16} />
             New
           </Button>
@@ -36,7 +45,7 @@ export function AuthorsPanel({ authors, onAddAuthor, onEditAuthor, onDeleteAutho
               {authors.map((author) => (
                 <div
                   key={author.id}
-                  className="flex items-center gap-3 p-3 border border-[#202225] rounded-lg hover:bg-[#404249] transition-colors"
+                  className="flex items-start gap-3 p-3 border border-[#202225] rounded-lg hover:bg-[#404249] transition-colors"
                 >
                   {author.avatar ? (
                     <img
@@ -49,11 +58,15 @@ export function AuthorsPanel({ authors, onAddAuthor, onEditAuthor, onDeleteAutho
                       <User size={24} className="text-gray-400" />
                     </div>
                   )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span
-                        className="font-semibold truncate text-sm"
-                        style={{ color: author.roleColor || '#ffffff' }}
+                        className="font-semibold text-sm break-all"
+                        style={{
+                          color: author.roleColor || "#ffffff",
+                          wordBreak: "break-all",
+                          overflowWrap: "anywhere",
+                        }}
                       >
                         {author.username}
                       </span>
@@ -65,10 +78,17 @@ export function AuthorsPanel({ authors, onAddAuthor, onEditAuthor, onDeleteAutho
                         />
                       )}
                       {author.isBot && (
-                        <Badge variant="secondary" className="text-xs bg-blue-500 text-white">BOT</Badge>
+                        <Badge
+                          variant="secondary"
+                          className="text-xs bg-blue-500 text-white"
+                        >
+                          BOT
+                        </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400">{author.roleColor || 'No color'}</p>
+                    <p className="text-xs text-gray-400">
+                      {author.roleColor || "No color"}
+                    </p>
                   </div>
                   <div className="flex gap-1">
                     <Button
@@ -95,5 +115,5 @@ export function AuthorsPanel({ authors, onAddAuthor, onEditAuthor, onDeleteAutho
         </ScrollArea>
       </div>
     </Card>
-  )
+  );
 }
