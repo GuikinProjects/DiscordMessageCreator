@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AuthorBlockGroup } from "./AuthorBlockGroup";
 import { Plus } from "@phosphor-icons/react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MessageDropZoneProps {
   blocks: MessageBlock[];
@@ -18,6 +19,7 @@ export function MessageDropZone({
   onBlocksChange,
   onOpenAuthorDialog,
 }: MessageDropZoneProps) {
+  const isMobile = useIsMobile();
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
@@ -133,7 +135,7 @@ export function MessageDropZone({
     if (authorIndex === -1) return;
 
     let nextAuthorIndex = blocks.findIndex(
-      (b, i) => i > authorIndex && b.type === "author"
+      (b, i) => i > authorIndex && b.type === "author",
     );
     if (nextAuthorIndex === -1) nextAuthorIndex = blocks.length;
 
@@ -144,16 +146,18 @@ export function MessageDropZone({
     onBlocksChange(newBlocks);
   };
 
+  type GroupChildBlock = { block: MessageBlock; index: number };
+
   const groupedBlocks = useMemo(() => {
     const groups: Array<{
       authorBlock: MessageBlock;
       authorIndex: number;
-      childBlocks: Array<{ block: MessageBlock; index: number }>;
+      childBlocks: Array<GroupChildBlock>;
     }> = [];
 
     let currentAuthorBlock: { block: MessageBlock; index: number } | null =
       null;
-    let currentChildBlocks: Array<{ block: MessageBlock; index: number }> = [];
+    let currentChildBlocks: Array<GroupChildBlock> = [];
 
     blocks.forEach((block, index) => {
       if (block.type === "author") {
@@ -172,9 +176,11 @@ export function MessageDropZone({
     });
 
     if (currentAuthorBlock) {
+      const authorBlock: { block: MessageBlock; index: number } =
+        currentAuthorBlock;
       groups.push({
-        authorBlock: currentAuthorBlock.block,
-        authorIndex: currentAuthorBlock.index,
+        authorBlock: authorBlock.block,
+        authorIndex: authorBlock.index,
         childBlocks: currentChildBlocks,
       });
     }
@@ -209,7 +215,9 @@ export function MessageDropZone({
           <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed rounded-lg">
             <Plus className="mb-2 text-muted-foreground" size={48} />
             <p className="text-muted-foreground">
-              Drag and drop items from the panel
+              {isMobile
+                ? "Tap the menu button to add items"
+                : "Drag and drop items from the panel"}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               Start by adding an author, then message content

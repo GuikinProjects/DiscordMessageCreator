@@ -31,8 +31,10 @@ export function AuthorDialog({
   const [isBot, setIsBot] = useState(false);
   const [verified, setVerified] = useState(false);
   const [badgeUrl, setBadgeUrl] = useState("");
-  const [showTimestamp, setShowTimestamp] = useState(false);
-  const [customTimestamp, setCustomTimestamp] = useState("");
+  const [showDate, setShowDate] = useState(false);
+  const [showTime, setShowTime] = useState(false);
+  const [customDate, setCustomDate] = useState("");
+  const [customTime, setCustomTime] = useState("");
 
   useEffect(() => {
     if (editingAuthor) {
@@ -42,8 +44,10 @@ export function AuthorDialog({
       setIsBot(editingAuthor.isBot || false);
       setVerified(editingAuthor.verified || false);
       setBadgeUrl(editingAuthor.badgeUrl || "");
-      setShowTimestamp(editingAuthor.showTimestamp || false);
-      setCustomTimestamp(editingAuthor.customTimestamp || "");
+      setShowDate(editingAuthor.showDate || false);
+      setShowTime(editingAuthor.showTime || false);
+      setCustomDate(editingAuthor.customDate || "");
+      setCustomTime(editingAuthor.customTime || "");
     } else {
       setUsername("");
       setAvatar("");
@@ -51,8 +55,10 @@ export function AuthorDialog({
       setIsBot(false);
       setVerified(false);
       setBadgeUrl("");
-      setShowTimestamp(false);
-      setCustomTimestamp("");
+      setShowDate(false);
+      setShowTime(false);
+      setCustomDate("");
+      setCustomTime("");
     }
   }, [editingAuthor, open]);
 
@@ -67,11 +73,10 @@ export function AuthorDialog({
       isBot,
       verified: isBot ? verified : undefined,
       badgeUrl: badgeUrl.trim() || undefined,
-      showTimestamp,
-      customTimestamp:
-        showTimestamp && customTimestamp.trim()
-          ? customTimestamp.trim()
-          : undefined,
+      showDate,
+      showTime,
+      customDate: showDate && customDate.trim() ? customDate.trim() : undefined,
+      customTime: showTime && customTime.trim() ? customTime.trim() : undefined,
     };
 
     onSave(author);
@@ -136,29 +141,69 @@ export function AuthorDialog({
               />
             </div>
           )}
-          <div className="flex items-center justify-between">
-            <Label htmlFor="showTimestamp">Show Timestamp</Label>
-            <Switch
-              id="showTimestamp"
-              checked={showTimestamp}
-              onCheckedChange={setShowTimestamp}
-            />
-          </div>
-          {showTimestamp && (
-            <div className="space-y-2 pl-4 border-l-2 border-primary/30">
-              <Label htmlFor="customTimestamp">Custom Timestamp</Label>
-              <Input
-                id="customTimestamp"
-                type="datetime-local"
-                value={customTimestamp}
-                onChange={(e) => setCustomTimestamp(e.target.value)}
-                placeholder="Select date and time"
-              />
-              <p className="text-xs text-muted-foreground">
-                Leave empty to use current date/time format
-              </p>
+          <div className="p-3 space-y-3 border rounded-lg bg-muted/30">
+            {/* Show Date Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="showDate" className="text-sm font-medium">
+                  Show Date
+                </Label>
+                <Switch
+                  id="showDate"
+                  checked={showDate}
+                  onCheckedChange={setShowDate}
+                />
+              </div>
+              <div className="pl-3 space-y-2 border-l-2 border-primary/30">
+                <Label htmlFor="customDate" className="text-xs">
+                  Custom Date
+                </Label>
+                <Input
+                  id="customDate"
+                  type="date"
+                  value={customDate}
+                  onChange={(e) => setCustomDate(e.target.value)}
+                  placeholder="Select date"
+                  className="h-8 text-sm"
+                  disabled={!showDate}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty for current date
+                </p>
+              </div>
             </div>
-          )}
+
+            {/* Show Time Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="showTime" className="text-sm font-medium">
+                  Show Time
+                </Label>
+                <Switch
+                  id="showTime"
+                  checked={showTime}
+                  onCheckedChange={setShowTime}
+                />
+              </div>
+              <div className="pl-3 space-y-2 border-l-2 border-primary/30">
+                <Label htmlFor="customTime" className="text-xs">
+                  Custom Time
+                </Label>
+                <Input
+                  id="customTime"
+                  type="time"
+                  value={customTime}
+                  onChange={(e) => setCustomTime(e.target.value)}
+                  placeholder="Select time"
+                  className="h-8 text-sm"
+                  disabled={!showTime}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty for current time
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="badgeUrl">Profile Badge URL (optional)</Label>
             <Input

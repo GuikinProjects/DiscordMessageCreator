@@ -22,6 +22,7 @@ import {
 } from "@phosphor-icons/react";
 import { EmbedDialog } from "./EmbedDialog";
 import { useState, useEffect, useRef } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MessageBlockEditorProps {
   block: MessageBlock;
@@ -42,12 +43,13 @@ export function MessageBlockEditor({
   onDragStart,
   onDragEnd,
 }: MessageBlockEditorProps) {
+  const isMobile = useIsMobile();
   const [embedDialogOpen, setEmbedDialogOpen] = useState(false);
   const [localContent, setLocalContent] = useState(block.data.content || "");
   const [localImageUrl, setLocalImageUrl] = useState(block.data.imageUrl || "");
   const [isDragging, setIsDragging] = useState(false);
-  const contentTimeoutRef = useRef<NodeJS.Timeout>();
-  const imageTimeoutRef = useRef<NodeJS.Timeout>();
+  const contentTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const imageTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     setLocalContent(block.data.content || "");
@@ -99,7 +101,7 @@ export function MessageBlockEditor({
     switch (block.type) {
       case "author":
         const selectedAuthor = authors.find(
-          (a) => a.id === block.data.authorId
+          (a) => a.id === block.data.authorId,
         );
         return (
           <div className="space-y-3">
@@ -107,25 +109,31 @@ export function MessageBlockEditor({
               value={block.data.authorId || ""}
               onValueChange={(value) => handleDataChange("authorId", value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="max-w-full">
                 <SelectValue placeholder="Select an author" />
               </SelectTrigger>
               <SelectContent>
                 {authors.map((author) => (
                   <SelectItem key={author.id} value={author.id}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       {author.avatar && (
                         <img
                           src={author.avatar}
                           alt={author.username}
-                          className="w-5 h-5 rounded-full"
+                          className="w-5 h-5 rounded-full flex-shrink-0"
                         />
                       )}
-                      <span style={{ color: author.roleColor }}>
+                      <span
+                        className="truncate"
+                        style={{ color: author.roleColor }}
+                      >
                         {author.username}
                       </span>
                       {author.isBot && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge
+                          variant="secondary"
+                          className="text-xs flex-shrink-0"
+                        >
                           BOT
                         </Badge>
                       )}
@@ -137,51 +145,95 @@ export function MessageBlockEditor({
 
             {selectedAuthor && (
               <div className="p-3 space-y-3 border rounded-lg bg-muted/30">
-                <div className="flex items-center justify-between">
-                  <Label
-                    htmlFor="showTimestamp"
-                    className="text-sm font-medium"
-                  >
-                    Show Timestamp
-                  </Label>
-                  <Switch
-                    id="showTimestamp"
-                    checked={
-                      (block.data.showTimestamp ??
-                        selectedAuthor?.showTimestamp ??
-                        false) as boolean
-                    }
-                    onCheckedChange={(checked) =>
-                      handleDataChange("showTimestamp", checked)
-                    }
-                  />
-                </div>
-
-                {(block.data.showTimestamp ??
-                  selectedAuthor?.showTimestamp) && (
+                {/* Show Date Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor="showDate" className="text-sm font-medium">
+                      Show Date
+                    </Label>
+                    <Switch
+                      id="showDate"
+                      checked={
+                        (block.data.showDate ??
+                          selectedAuthor?.showDate ??
+                          false) as boolean
+                      }
+                      onCheckedChange={(checked) =>
+                        handleDataChange("showDate", checked)
+                      }
+                    />
+                  </div>
                   <div className="pl-3 space-y-2 border-l-2 border-primary/30">
-                    <Label htmlFor="customTimestamp" className="text-xs">
-                      Custom Timestamp
+                    <Label htmlFor="customDate" className="text-xs">
+                      Custom Date
                     </Label>
                     <Input
-                      id="customTimestamp"
-                      type="datetime-local"
+                      id="customDate"
+                      type="date"
                       value={
-                        block.data.customTimestamp ??
-                        selectedAuthor?.customTimestamp ??
+                        block.data.customDate ??
+                        selectedAuthor?.customDate ??
                         ""
                       }
                       onChange={(e) =>
-                        handleDataChange("customTimestamp", e.target.value)
+                        handleDataChange("customDate", e.target.value)
                       }
-                      placeholder="Select date and time"
+                      placeholder="Select date"
                       className="h-8 text-sm"
+                      disabled={
+                        !(block.data.showDate ?? selectedAuthor?.showDate)
+                      }
                     />
                     <p className="text-xs text-muted-foreground">
-                      Leave empty for current date/time
+                      Leave empty for current date
                     </p>
                   </div>
-                )}
+                </div>
+
+                {/* Show Time Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor="showTime" className="text-sm font-medium">
+                      Show Time
+                    </Label>
+                    <Switch
+                      id="showTime"
+                      checked={
+                        (block.data.showTime ??
+                          selectedAuthor?.showTime ??
+                          false) as boolean
+                      }
+                      onCheckedChange={(checked) =>
+                        handleDataChange("showTime", checked)
+                      }
+                    />
+                  </div>
+                  <div className="pl-3 space-y-2 border-l-2 border-primary/30">
+                    <Label htmlFor="customTime" className="text-xs">
+                      Custom Time
+                    </Label>
+                    <Input
+                      id="customTime"
+                      type="time"
+                      value={
+                        block.data.customTime ??
+                        selectedAuthor?.customTime ??
+                        ""
+                      }
+                      onChange={(e) =>
+                        handleDataChange("customTime", e.target.value)
+                      }
+                      placeholder="Select time"
+                      className="h-8 text-sm"
+                      disabled={
+                        !(block.data.showTime ?? selectedAuthor?.showTime)
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Leave empty for current time
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -237,21 +289,24 @@ export function MessageBlockEditor({
                     })
                   }
                 >
-                  <SelectTrigger className="h-8">
+                  <SelectTrigger className="h-8 max-w-full">
                     <SelectValue placeholder="Select author" />
                   </SelectTrigger>
                   <SelectContent>
                     {authors.map((author) => (
                       <SelectItem key={author.id} value={author.id}>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
                           {author.avatar && (
                             <img
                               src={author.avatar}
                               alt={author.username}
-                              className="w-4 h-4 rounded-full"
+                              className="w-4 h-4 rounded-full flex-shrink-0"
                             />
                           )}
-                          <span style={{ color: author.roleColor }}>
+                          <span
+                            className="truncate"
+                            style={{ color: author.roleColor }}
+                          >
                             {author.username}
                           </span>
                         </div>
@@ -400,23 +455,25 @@ export function MessageBlockEditor({
   return (
     <>
       <Card
-        className={`p-4 bg-card cursor-move hover:border-primary/50 transition-all ${
-          isDragging ? "opacity-50 border-primary" : ""
-        }`}
-        draggable
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
+        className={`p-4 bg-card transition-all ${
+          isMobile ? "" : "cursor-move hover:border-primary/50"
+        } ${isDragging ? "opacity-50 border-primary" : ""}`}
+        draggable={!isMobile}
+        onDragStart={!isMobile ? handleDragStart : undefined}
+        onDragEnd={!isMobile ? handleDragEnd : undefined}
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="transition-colors cursor-grab active:cursor-grabbing hover:text-primary">
-                <DotsSixVertical
-                  className="text-muted-foreground"
-                  size={20}
-                  weight="bold"
-                />
-              </div>
+              {!isMobile && (
+                <div className="transition-colors cursor-grab active:cursor-grabbing hover:text-primary">
+                  <DotsSixVertical
+                    className="text-muted-foreground"
+                    size={20}
+                    weight="bold"
+                  />
+                </div>
+              )}
               <span className="text-sm font-medium">
                 {blockTypeLabels[block.type]}
               </span>

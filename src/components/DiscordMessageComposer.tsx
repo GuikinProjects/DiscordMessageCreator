@@ -143,8 +143,8 @@ export function DiscordMessageComposer({
   const handleUpdateBlock = (blockId: string, data: MessageBlock["data"]) => {
     onBlocksChange(
       blocks.map((b) =>
-        b.id === blockId ? { ...b, data: { ...b.data, ...data } } : b
-      )
+        b.id === blockId ? { ...b, data: { ...b.data, ...data } } : b,
+      ),
     );
   };
 
@@ -164,21 +164,50 @@ export function DiscordMessageComposer({
   const embedBlocks = blocks.filter((b) => b.type === "embed");
   const imageBlocks = blocks.filter((b) => b.type === "image");
 
-  const formatTimestamp = (customTimestamp?: string) => {
-    const sanitized = customTimestamp?.trim();
-    const date = sanitized ? new Date(sanitized) : new Date();
+  const formatDateTime = (
+    showDate?: boolean,
+    showTime?: boolean,
+    customDate?: string,
+    customTime?: string,
+  ) => {
+    if (!showDate && !showTime) return "";
 
-    if (Number.isNaN(date.getTime())) {
-      return sanitized ?? "";
+    const now = new Date();
+    let date = now;
+
+    // If custom date is provided, use it
+    if (customDate?.trim()) {
+      const dateStr = customDate.trim();
+      date = new Date(dateStr);
+      if (Number.isNaN(date.getTime())) {
+        date = now;
+      }
     }
 
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
+    // If custom time is provided, apply it
+    if (customTime?.trim()) {
+      const [hours, minutes] = customTime.trim().split(":");
+      if (hours && minutes) {
+        date.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+      }
+    }
 
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
+    const parts: string[] = [];
+
+    if (showDate) {
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      parts.push(`${day}/${month}/${year}`);
+    }
+
+    if (showTime) {
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      parts.push(`${hours}:${minutes}`);
+    }
+
+    return parts.join(" ");
   };
 
   const renderInlineBlockEditor = (block: MessageBlock) => {
@@ -217,20 +246,37 @@ export function DiscordMessageComposer({
               ))}
             </SelectContent>
           </Select>
-          <div className="flex items-center mt-3 space-x-2">
-            <Switch
-              id={`show-timestamp-${block.id}`}
-              checked={block.data.showTimestamp || false}
-              onCheckedChange={(checked) =>
-                handleUpdateBlock(block.id, { showTimestamp: checked })
-              }
-            />
-            <Label
-              htmlFor={`show-timestamp-${block.id}`}
-              className="text-xs text-gray-400"
-            >
-              Show Timestamp
-            </Label>
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id={`show-date-${block.id}`}
+                checked={block.data.showDate || false}
+                onCheckedChange={(checked) =>
+                  handleUpdateBlock(block.id, { showDate: checked })
+                }
+              />
+              <Label
+                htmlFor={`show-date-${block.id}`}
+                className="text-xs text-gray-400"
+              >
+                Show Date
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id={`show-time-${block.id}`}
+                checked={block.data.showTime || false}
+                onCheckedChange={(checked) =>
+                  handleUpdateBlock(block.id, { showTime: checked })
+                }
+              />
+              <Label
+                htmlFor={`show-time-${block.id}`}
+                className="text-xs text-gray-400"
+              >
+                Show Time
+              </Label>
+            </div>
           </div>
           {authors.length === 0 && (
             <Button
@@ -513,15 +559,18 @@ export function DiscordMessageComposer({
     .map((b) => b.data.content)
     .join("\n\n");
 
-  const shouldShowTimestamp = Boolean(
-    authorBlock?.data?.showTimestamp ?? author?.showTimestamp
-  );
-  const customTimestamp =
-    authorBlock?.data?.customTimestamp ?? author?.customTimestamp;
+  const showDate = Boolean(authorBlock?.data?.showDate ?? author?.showDate);
+  const showTime = Boolean(authorBlock?.data?.showTime ?? author?.showTime);
+  const customDate = authorBlock?.data?.customDate ?? author?.customDate;
+  const customTime = authorBlock?.data?.customTime ?? author?.customTime;
 
-  const messageTimestamp = shouldShowTimestamp
-    ? formatTimestamp(customTimestamp)
-    : "";
+  const messageTimestamp = formatDateTime(
+    showDate,
+    showTime,
+    customDate,
+    customTime,
+  );
+  const shouldShowTimestamp = showDate || showTime;
 
   useEffect(() => {
     if (!messageContainerRef.current) return;

@@ -11,21 +11,50 @@ import {
 import { MessageBlock, Author } from "@/lib/types";
 import { parseDiscordMarkdown } from "@/lib/markdown";
 
-const formatTimestamp = (timestamp?: string) => {
-  const sanitized = timestamp?.trim();
-  const date = sanitized ? new Date(sanitized) : new Date();
+const formatDateTime = (
+  showDate?: boolean,
+  showTime?: boolean,
+  customDate?: string,
+  customTime?: string,
+) => {
+  if (!showDate && !showTime) return "";
 
-  if (Number.isNaN(date.getTime())) {
-    return sanitized ?? "";
+  const now = new Date();
+  let date = now;
+
+  // If custom date is provided, use it
+  if (customDate?.trim()) {
+    const dateStr = customDate.trim();
+    date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) {
+      date = now;
+    }
   }
 
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
+  // If custom time is provided, apply it
+  if (customTime?.trim()) {
+    const [hours, minutes] = customTime.trim().split(":");
+    if (hours && minutes) {
+      date.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+    }
+  }
 
-  return `${day}/${month}/${year} ${hours}:${minutes}`;
+  const parts: string[] = [];
+
+  if (showDate) {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    parts.push(`${day}/${month}/${year}`);
+  }
+
+  if (showTime) {
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    parts.push(`${hours}:${minutes}`);
+  }
+
+  return parts.join(" ");
 };
 
 interface ComposedMessagePreviewProps {
@@ -213,7 +242,7 @@ export function ComposedMessagePreview({
       <DiscordMessages>
         {groupedMessages.map((group, groupIdx) => {
           const messageBlocks = group.blocks.filter(
-            (b) => b.type === "message"
+            (b) => b.type === "message",
           );
           const messageContent = messageBlocks
             .filter((b) => b.data.content)
@@ -230,22 +259,29 @@ export function ComposedMessagePreview({
           const isEdited = messageBlocks.some((b) => b.data.edited);
 
           const embeds = group.blocks.filter(
-            (b) => b.type === "embed" && b.data.embed
+            (b) => b.type === "embed" && b.data.embed,
           );
           const images = group.blocks.filter(
-            (b) => b.type === "image" && b.data.imageUrl
+            (b) => b.type === "image" && b.data.imageUrl,
           );
 
-          const showTimestamp = Boolean(
-            group.authorBlock.data.showTimestamp ?? group.author.showTimestamp
+          const showDate = Boolean(
+            group.authorBlock.data.showDate ?? group.author.showDate,
           );
-          const customTimestamp =
-            group.authorBlock.data.customTimestamp ??
-            group.author.customTimestamp;
+          const showTime = Boolean(
+            group.authorBlock.data.showTime ?? group.author.showTime,
+          );
+          const customDate =
+            group.authorBlock.data.customDate ?? group.author.customDate;
+          const customTime =
+            group.authorBlock.data.customTime ?? group.author.customTime;
 
-          const messageTimestamp = showTimestamp
-            ? formatTimestamp(customTimestamp)
-            : "";
+          const messageTimestamp = formatDateTime(
+            showDate,
+            showTime,
+            customDate,
+            customTime,
+          );
 
           return (
             <DiscordMessage
