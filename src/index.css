@@ -41,6 +41,12 @@
   --input: oklch(0.32 0.01 264);
   --ring: oklch(0.59 0.24 264);
 
+  --scrollbar-size: 12px;
+  --scrollbar-track: color-mix(in oklab, var(--background) 88%, black);
+  --scrollbar-thumb: color-mix(in oklab, var(--primary) 38%, var(--secondary));
+  --scrollbar-thumb-hover: color-mix(in oklab, var(--primary) 58%, white 8%);
+  --scrollbar-thumb-active: color-mix(in oklab, var(--primary) 72%, white 14%);
+
   --radius: 0.5rem;
 }
 
@@ -71,4 +77,41 @@
   --radius-xl: calc(var(--radius) * 2);
   --radius-2xl: calc(var(--radius) * 3);
   --radius-full: 9999px;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--scrollbar-thumb), var(--scrollbar-thumb-hover));
+  border: 3px solid var(--scrollbar-track);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--scrollbar-thumb-hover), var(--scrollbar-thumb-active));
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: var(--scrollbar-thumb-active);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track);
 }

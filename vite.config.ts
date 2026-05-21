@@ -1,12 +1,24 @@
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { resolve } from "path";
 
 const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname;
 
+function manualChunks(id: string) {
+	if (id.includes("@skyra/discord-components-react")) {
+		return "discord";
+	}
+
+	if (id.includes("sonner")) {
+		return "notifications";
+	}
+
+	return undefined;
+}
+
 // https://vite.dev/config/
-export default defineConfig(({ command }) => ({
+export default defineConfig(() => ({
 	base: "/",
 	plugins: [react(), tailwindcss()],
 	resolve: {
@@ -20,10 +32,7 @@ export default defineConfig(({ command }) => ({
 	build: {
 		rollupOptions: {
 			output: {
-				manualChunks: {
-					discord: ["@skyra/discord-components-react"],
-					notifications: ["sonner"],
-				},
+				manualChunks,
 			},
 		},
 	},

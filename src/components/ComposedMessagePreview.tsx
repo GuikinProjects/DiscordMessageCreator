@@ -70,8 +70,8 @@ export function ComposedMessagePreview({
     const style = document.createElement("style");
     style.textContent = `
       discord-messages {
-        background-color: #36393f;
-        border-radius: 8px;
+        background-color: transparent;
+        border-radius: 0;
       }
       discord-message {
         margin-bottom: 16px;
@@ -227,162 +227,191 @@ export function ComposedMessagePreview({
 
   if (groupedMessages.length === 0) {
     return (
-      <div className="bg-[#36393f] rounded-lg overflow-hidden p-4">
-        <DiscordMessages>
-          <div className="flex items-center justify-center h-64 text-gray-400">
-            Add an author to start building your message
+      <div className="overflow-hidden rounded-[28px] border border-white/8 bg-[#36393f] shadow-[0_24px_70px_rgba(0,0,0,0.28)]">
+        <div className="border-b border-white/8 px-5 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-base font-semibold uppercase tracking-[0.18em] text-slate-300">
+              Preview
+            </h2>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+              Empty state
+            </span>
           </div>
-        </DiscordMessages>
+        </div>
+        <div className="bg-[#36393f] p-5">
+          <DiscordMessages>
+            <div className="flex h-72 flex-col items-center justify-center rounded-[22px] border border-dashed border-white/10 bg-[#36393f] px-6 text-center text-gray-400">
+              <div className="mb-4 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.22em] text-cyan-300/80">
+                Waiting for content
+              </div>
+              <p className="text-lg font-medium text-white">
+                Add an author to start building your message
+              </p>
+            </div>
+          </DiscordMessages>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#36393f] rounded-lg overflow-hidden p-4">
-      <DiscordMessages>
-        {groupedMessages.map((group, groupIdx) => {
-          const messageBlocks = group.blocks.filter(
-            (b) => b.type === "message",
-          );
-          const messageContent = messageBlocks
-            .filter((b) => b.data.content)
-            .map((b) => b.data.content)
-            .join("\n");
+    <div className="overflow-hidden rounded-[28px] border border-white/8 bg-[#36393f] shadow-[0_24px_70px_rgba(0,0,0,0.28)]">
+      <div className="border-b border-white/8 px-5 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-base font-semibold uppercase tracking-[0.18em] text-slate-300">
+            Preview
+          </h2>
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+            {groupedMessages.length} message group{groupedMessages.length === 1 ? "" : "s"}
+          </span>
+        </div>
+      </div>
+      <div className="bg-[#36393f] p-5">
+        <DiscordMessages>
+          {groupedMessages.map((group, groupIdx) => {
+            const messageBlocks = group.blocks.filter(
+              (b) => b.type === "message",
+            );
+            const messageContent = messageBlocks
+              .filter((b) => b.data.content)
+              .map((b) => b.data.content)
+              .join("\n");
 
-          // Get reply from the first message block that has one
-          const reply = messageBlocks.find((b) => b.data.reply)?.data.reply;
-          const replyAuthor = reply
-            ? authors.find((a) => a.id === reply.authorId)
-            : null;
+            // Get reply from the first message block that has one
+            const reply = messageBlocks.find((b) => b.data.reply)?.data.reply;
+            const replyAuthor = reply
+              ? authors.find((a) => a.id === reply.authorId)
+              : null;
 
-          // Check if any message block is marked as edited
-          const isEdited = messageBlocks.some((b) => b.data.edited);
+            // Check if any message block is marked as edited
+            const isEdited = messageBlocks.some((b) => b.data.edited);
 
-          const embeds = group.blocks.filter(
-            (b) => b.type === "embed" && b.data.embed,
-          );
-          const images = group.blocks.filter(
-            (b) => b.type === "image" && b.data.imageUrl,
-          );
+            const embeds = group.blocks.filter(
+              (b) => b.type === "embed" && b.data.embed,
+            );
+            const images = group.blocks.filter(
+              (b) => b.type === "image" && b.data.imageUrl,
+            );
 
-          const showDate = Boolean(
-            group.authorBlock.data.showDate ?? group.author.showDate,
-          );
-          const showTime = Boolean(
-            group.authorBlock.data.showTime ?? group.author.showTime,
-          );
-          const customDate =
-            group.authorBlock.data.customDate ?? group.author.customDate;
-          const customTime =
-            group.authorBlock.data.customTime ?? group.author.customTime;
+            const showDate = Boolean(
+              group.authorBlock.data.showDate ?? group.author.showDate,
+            );
+            const showTime = Boolean(
+              group.authorBlock.data.showTime ?? group.author.showTime,
+            );
+            const customDate =
+              group.authorBlock.data.customDate ?? group.author.customDate;
+            const customTime =
+              group.authorBlock.data.customTime ?? group.author.customTime;
 
-          const messageTimestamp = formatDateTime(
-            showDate,
-            showTime,
-            customDate,
-            customTime,
-          );
+            const messageTimestamp = formatDateTime(
+              showDate,
+              showTime,
+              customDate,
+              customTime,
+            );
 
-          return (
-            <DiscordMessage
-              key={groupIdx}
-              author={group.author.username}
-              avatar={group.author.avatar}
-              roleColor={group.author.roleColor}
-              bot={group.author.isBot}
-              verified={group.author.verified}
-              roleIcon={group.author.badgeUrl}
-              edited={isEdited}
-              timestamp={messageTimestamp}
-            >
-              {reply && replyAuthor && (
-                <DiscordReply
-                  slot="reply"
-                  author={replyAuthor.username}
-                  avatar={replyAuthor.avatar}
-                  roleColor={replyAuthor.roleColor}
-                  bot={replyAuthor.isBot}
-                  edited={reply.edited}
-                  attachment={reply.attachment}
-                  style={{ marginLeft: "55px" }}
-                >
-                  {reply.content}
-                </DiscordReply>
-              )}
-
-              {messageContent && (
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: parseDiscordMarkdown(messageContent),
-                  }}
-                />
-              )}
-
-              {embeds.map((embedBlock) => {
-                const embed = embedBlock.data.embed;
-                if (!embed) return null;
-
-                return (
-                  <DiscordEmbed
-                    key={embedBlock.id}
-                    slot="embeds"
-                    color={embed.color}
-                    embedTitle={embed.title}
-                    url={embed.url}
-                    thumbnail={embed.thumbnail}
-                    image={embed.image}
-                    authorName={embed.authorName}
-                    authorImage={embed.authorIcon}
-                    authorUrl={embed.authorUrl}
+            return (
+              <DiscordMessage
+                key={groupIdx}
+                author={group.author.username}
+                avatar={group.author.avatar}
+                roleColor={group.author.roleColor}
+                bot={group.author.isBot}
+                verified={group.author.verified}
+                roleIcon={group.author.badgeUrl}
+                edited={isEdited}
+                timestamp={messageTimestamp}
+              >
+                {reply && replyAuthor && (
+                  <DiscordReply
+                    slot="reply"
+                    author={replyAuthor.username}
+                    avatar={replyAuthor.avatar}
+                    roleColor={replyAuthor.roleColor}
+                    bot={replyAuthor.isBot}
+                    edited={reply.edited}
+                    attachment={reply.attachment}
+                    style={{ marginLeft: "55px" }}
                   >
-                    {embed.description && (
-                      <div
-                        slot="description"
-                        dangerouslySetInnerHTML={{
-                          __html: parseDiscordMarkdown(embed.description),
-                        }}
-                      />
-                    )}
-                    {embed.fields && embed.fields.length > 0 && (
-                      <DiscordEmbedFields slot="fields">
-                        {embed.fields.map((field, fieldIdx) => (
-                          <DiscordEmbedField
-                            key={fieldIdx}
-                            fieldTitle={field.name}
-                            inline={field.inline}
-                          >
-                            <span
-                              dangerouslySetInnerHTML={{
-                                __html: parseDiscordMarkdown(field.value),
-                              }}
-                            />
-                          </DiscordEmbedField>
-                        ))}
-                      </DiscordEmbedFields>
-                    )}
-                    {embed.footerText && (
-                      <div slot="footer">{embed.footerText}</div>
-                    )}
-                  </DiscordEmbed>
-                );
-              })}
+                    {reply.content}
+                  </DiscordReply>
+                )}
 
-              {images.length > 0 && (
-                <DiscordAttachments slot="attachments">
-                  {images.map((imageBlock) => (
-                    <img
-                      key={imageBlock.id}
-                      src={imageBlock.data.imageUrl}
-                      alt="Attachment"
-                      className="max-w-full rounded"
-                    />
-                  ))}
-                </DiscordAttachments>
-              )}
-            </DiscordMessage>
-          );
-        })}
-      </DiscordMessages>
+                {messageContent && (
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: parseDiscordMarkdown(messageContent),
+                    }}
+                  />
+                )}
+
+                {embeds.map((embedBlock) => {
+                  const embed = embedBlock.data.embed;
+                  if (!embed) return null;
+
+                  return (
+                    <DiscordEmbed
+                      key={embedBlock.id}
+                      slot="embeds"
+                      color={embed.color}
+                      embedTitle={embed.title}
+                      url={embed.url}
+                      thumbnail={embed.thumbnail}
+                      image={embed.image}
+                      authorName={embed.authorName}
+                      authorImage={embed.authorIcon}
+                      authorUrl={embed.authorUrl}
+                    >
+                      {embed.description && (
+                        <div
+                          slot="description"
+                          dangerouslySetInnerHTML={{
+                            __html: parseDiscordMarkdown(embed.description),
+                          }}
+                        />
+                      )}
+                      {embed.fields && embed.fields.length > 0 && (
+                        <DiscordEmbedFields slot="fields">
+                          {embed.fields.map((field, fieldIdx) => (
+                            <DiscordEmbedField
+                              key={fieldIdx}
+                              fieldTitle={field.name}
+                              inline={field.inline}
+                            >
+                              <span
+                                dangerouslySetInnerHTML={{
+                                  __html: parseDiscordMarkdown(field.value),
+                                }}
+                              />
+                            </DiscordEmbedField>
+                          ))}
+                        </DiscordEmbedFields>
+                      )}
+                      {embed.footerText && (
+                        <div slot="footer">{embed.footerText}</div>
+                      )}
+                    </DiscordEmbed>
+                  );
+                })}
+
+                {images.length > 0 && (
+                  <DiscordAttachments slot="attachments">
+                    {images.map((imageBlock) => (
+                      <img
+                        key={imageBlock.id}
+                        src={imageBlock.data.imageUrl}
+                        alt="Attachment"
+                        className="max-w-full rounded"
+                      />
+                    ))}
+                  </DiscordAttachments>
+                )}
+              </DiscordMessage>
+            );
+          })}
+        </DiscordMessages>
+      </div>
     </div>
   );
 }

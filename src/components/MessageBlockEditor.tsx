@@ -4,13 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
@@ -43,6 +36,8 @@ export function MessageBlockEditor({
   onDragStart,
   onDragEnd,
 }: MessageBlockEditorProps) {
+  const selectClasses =
+    "flex h-9 w-full max-w-full items-center rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground shadow-xs outline-none transition-[color,box-shadow] focus:border-ring focus:ring-3 focus:ring-ring/50";
   const isMobile = useIsMobile();
   const [embedDialogOpen, setEmbedDialogOpen] = useState(false);
   const [localContent, setLocalContent] = useState(block.data.content || "");
@@ -53,11 +48,23 @@ export function MessageBlockEditor({
 
   useEffect(() => {
     setLocalContent(block.data.content || "");
-  }, [block.id]);
+  }, [block.data.content]);
 
   useEffect(() => {
     setLocalImageUrl(block.data.imageUrl || "");
-  }, [block.id]);
+  }, [block.data.imageUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (contentTimeoutRef.current) {
+        clearTimeout(contentTimeoutRef.current);
+      }
+
+      if (imageTimeoutRef.current) {
+        clearTimeout(imageTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleDataChange = (key: string, value: any) => {
     onUpdate({
@@ -105,43 +112,18 @@ export function MessageBlockEditor({
         );
         return (
           <div className="space-y-3">
-            <Select
+            <select
               value={block.data.authorId || ""}
-              onValueChange={(value) => handleDataChange("authorId", value)}
+              onChange={(e) => handleDataChange("authorId", e.target.value)}
+              className={selectClasses}
             >
-              <SelectTrigger className="max-w-full">
-                <SelectValue placeholder="Select an author" />
-              </SelectTrigger>
-              <SelectContent>
-                {authors.map((author) => (
-                  <SelectItem key={author.id} value={author.id}>
-                    <div className="flex items-center gap-2 min-w-0">
-                      {author.avatar && (
-                        <img
-                          src={author.avatar}
-                          alt={author.username}
-                          className="w-5 h-5 rounded-full flex-shrink-0"
-                        />
-                      )}
-                      <span
-                        className="truncate"
-                        style={{ color: author.roleColor }}
-                      >
-                        {author.username}
-                      </span>
-                      {author.isBot && (
-                        <Badge
-                          variant="secondary"
-                          className="text-xs flex-shrink-0"
-                        >
-                          BOT
-                        </Badge>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <option value="">Select an author</option>
+              {authors.map((author) => (
+                <option key={author.id} value={author.id}>
+                  {author.username}{author.isBot ? " [BOT]" : ""}
+                </option>
+              ))}
+            </select>
 
             {selectedAuthor && (
               <div className="p-3 space-y-3 border rounded-lg bg-muted/30">
@@ -280,40 +262,23 @@ export function MessageBlockEditor({
                   </Button>
                 </div>
 
-                <Select
+                <select
                   value={block.data.reply.authorId || ""}
-                  onValueChange={(value) =>
+                  onChange={(e) =>
                     handleDataChange("reply", {
                       ...block.data.reply,
-                      authorId: value,
+                      authorId: e.target.value,
                     })
                   }
+                  className={`${selectClasses} h-8 text-sm`}
                 >
-                  <SelectTrigger className="h-8 max-w-full">
-                    <SelectValue placeholder="Select author" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {authors.map((author) => (
-                      <SelectItem key={author.id} value={author.id}>
-                        <div className="flex items-center gap-2 min-w-0">
-                          {author.avatar && (
-                            <img
-                              src={author.avatar}
-                              alt={author.username}
-                              className="w-4 h-4 rounded-full flex-shrink-0"
-                            />
-                          )}
-                          <span
-                            className="truncate"
-                            style={{ color: author.roleColor }}
-                          >
-                            {author.username}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <option value="">Select author</option>
+                  {authors.map((author) => (
+                    <option key={author.id} value={author.id}>
+                      {author.username}
+                    </option>
+                  ))}
+                </select>
 
                 <Input
                   value={block.data.reply.content || ""}
@@ -455,9 +420,8 @@ export function MessageBlockEditor({
   return (
     <>
       <Card
-        className={`p-4 bg-card transition-all ${
-          isMobile ? "" : "cursor-move hover:border-primary/50"
-        } ${isDragging ? "opacity-50 border-primary" : ""}`}
+        className={`p-4 bg-card transition-all ${isMobile ? "" : "cursor-move hover:border-primary/50"
+          } ${isDragging ? "opacity-50 border-primary" : ""}`}
         draggable={!isMobile}
         onDragStart={!isMobile ? handleDragStart : undefined}
         onDragEnd={!isMobile ? handleDragEnd : undefined}

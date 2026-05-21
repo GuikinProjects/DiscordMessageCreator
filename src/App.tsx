@@ -33,7 +33,7 @@ function migrateAuthor(author: Author): Author {
           migrated.customDate = `${year}-${month}-${day}`;
           migrated.customTime = `${hours}:${minutes}`;
         }
-      } catch (e) {
+      } catch {
         // If parsing fails, just enable both without custom values
       }
     }
@@ -75,7 +75,7 @@ function migrateMessageBlock(block: MessageBlock): MessageBlock {
           migrated.data.customDate = `${year}-${month}-${day}`;
           migrated.data.customTime = `${hours}:${minutes}`;
         }
-      } catch (e) {
+      } catch {
         // If parsing fails, just enable both without custom values
       }
     }
@@ -146,7 +146,7 @@ function App() {
         setCurrentBlocks(migratedBlocks);
       }
     }
-  }, []); // Only run once on mount
+  }, [authors, currentBlocks, setAuthors, setCurrentBlocks]);
   const [authorDialogOpen, setAuthorDialogOpen] = useState(false);
   const [editingAuthor, setEditingAuthor] = useState<Author | undefined>(
     undefined,
@@ -307,7 +307,13 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#36393f] flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#36393f] text-white md:flex md:flex-row">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute left-[-10%] top-[-8%] h-80 w-80 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="absolute right-[8%] top-[12%] h-72 w-72 rounded-full bg-indigo-500/12 blur-3xl" />
+        <div className="absolute bottom-[-10%] left-[28%] h-96 w-96 rounded-full bg-sky-400/8 blur-3xl" />
+      </div>
+
       <ElementsSidebar
         authors={authors || []}
         messages={messages || []}
@@ -323,11 +329,38 @@ function App() {
       />
 
       <div
-        className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? "md:ml-14" : "md:ml-80"} ml-0`}
+        className={`relative flex-1 transition-all duration-300 ${sidebarCollapsed ? "md:ml-14" : "md:ml-80"} ml-0`}
       >
-        <div className="max-w-[1800px] mx-auto px-3 md:px-6 py-4 md:py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_600px] gap-4 md:gap-8">
-            <div>
+        <div className="mx-auto max-w-[1800px] px-3 py-4 md:px-6 md:py-8">
+          <div className="mb-4 flex flex-wrap gap-2 md:mb-8">
+            <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 shadow-[0_20px_80px_rgba(0,0,0,0.18)] backdrop-blur">
+              <div className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                Authors
+              </div>
+              <div className="mt-1 text-2xl font-semibold text-white">
+                {authors?.length || 0}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 shadow-[0_20px_80px_rgba(0,0,0,0.18)] backdrop-blur">
+              <div className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                Blocks
+              </div>
+              <div className="mt-1 text-2xl font-semibold text-white">
+                {currentBlocks?.length || 0}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 shadow-[0_20px_80px_rgba(0,0,0,0.18)] backdrop-blur">
+              <div className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                Saved
+              </div>
+              <div className="mt-1 text-2xl font-semibold text-white">
+                {messages?.length || 0}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:gap-8 xl:grid-cols-[minmax(0,1.15fr)_minmax(380px,560px)]">
+            <div className="min-w-0">
               <MessageDropZone
                 blocks={currentBlocks || []}
                 authors={authors || []}
@@ -336,9 +369,11 @@ function App() {
               />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <Suspense
-                fallback={<div className="h-64 rounded-lg bg-[#2f3136]" />}
+                fallback={
+                  <div className="h-64 rounded-[28px] border border-white/8 bg-[#2a2c35]" />
+                }
               >
                 <ComposedMessagePreview
                   blocks={currentBlocks || []}

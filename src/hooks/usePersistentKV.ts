@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type PersistentKVReturn<T> = [
 	T | undefined,
@@ -31,8 +31,7 @@ function useLocalStorageKV<T>(
 	initialValue: T,
 ): PersistentKVReturn<T> {
 	const storageKey = `discord-message-creator:${key}`;
-	const initialRef = useRef(initialValue);
-	const initialFallback = initialRef.current;
+	const [initialFallback] = useState(initialValue);
 
 	const [value, setValue] = useState<T | undefined>(() =>
 		readLocalStorageValue(storageKey, initialFallback),
@@ -81,8 +80,8 @@ function useLocalStorageKV<T>(
 				const resolved =
 					typeof nextValue === "function"
 						? (nextValue as (prev: T | undefined) => T | undefined)(
-								current,
-							)
+							current,
+						)
 						: nextValue;
 				persistValue(resolved);
 				return resolved;

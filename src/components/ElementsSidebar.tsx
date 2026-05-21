@@ -47,9 +47,9 @@ export function ElementsSidebar({
 
   const sidebarContent = (
     <>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <div>
-          <h3 className="text-sm font-medium mb-3 text-gray-400">
+      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        <div className="rounded-[24px] border border-white/8 bg-black/15 p-4">
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
             {isMobile ? "TAP TO ADD" : "DRAG TO ADD"}
           </h3>
           <div className="space-y-2">
@@ -60,15 +60,15 @@ export function ElementsSidebar({
           </div>
         </div>
 
-        <Separator className="bg-[#202225]" />
+        <Separator className="bg-white/6" />
 
-        <div>
+        <div className="rounded-[24px] border border-white/8 bg-black/15 p-3">
           <Tabs defaultValue="authors" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-white/5 p-1">
               <TabsTrigger value="authors">Authors</TabsTrigger>
               <TabsTrigger value="export">Export</TabsTrigger>
             </TabsList>
-            <TabsContent value="authors">
+            <TabsContent value="authors" className="mt-3">
               <AuthorsPanel
                 authors={authors}
                 onAddAuthor={onAddAuthor}
@@ -76,7 +76,7 @@ export function ElementsSidebar({
                 onDeleteAuthor={onDeleteAuthor}
               />
             </TabsContent>
-            <TabsContent value="export">
+            <TabsContent value="export" className="mt-3">
               <ExportPanel
                 messages={messages}
                 authors={authors}
@@ -97,16 +97,16 @@ export function ElementsSidebar({
           <Button
             variant="ghost"
             size="icon"
-            className="fixed top-4 left-4 z-50 bg-[#2f3136] border border-[#202225] text-gray-400 hover:text-white hover:bg-[#404249]"
+            className="fixed left-4 top-4 z-50 border border-white/10 bg-[#20232d]/90 text-gray-300 shadow-lg backdrop-blur hover:bg-[#2d3340] hover:text-white"
           >
             <List size={24} weight="bold" />
           </Button>
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="w-80 bg-[#2f3136] border-r border-[#202225] p-0"
+          className="w-80 border-r border-white/8 bg-[#1f222c] p-0"
         >
-          <SheetHeader className="p-4 border-b border-[#202225]">
+          <SheetHeader className="border-b border-white/8 p-4">
             <SheetTitle className="text-lg font-semibold text-white">
               Elements
             </SheetTitle>
@@ -120,12 +120,12 @@ export function ElementsSidebar({
   // Desktop: Fixed sidebar
   if (collapsed) {
     return (
-      <div className="fixed left-0 top-0 h-full bg-[#2f3136] border-r border-[#202225] z-10">
+      <div className="fixed left-0 top-0 z-10 h-full border-r border-white/8 bg-[#1f222c]/95 backdrop-blur">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => onCollapsedChange(false)}
-          className="m-2 text-gray-400 hover:text-white"
+          className="m-2 text-gray-400 hover:bg-white/5 hover:text-white"
         >
           <CaretRight size={20} />
         </Button>
@@ -134,14 +134,14 @@ export function ElementsSidebar({
   }
 
   return (
-    <div className="fixed left-0 top-0 h-full w-80 bg-[#2f3136] border-r border-[#202225] z-10 flex flex-col">
-      <div className="p-4 flex items-center justify-between border-b border-[#202225]">
+    <div className="fixed left-0 top-0 z-10 flex h-full w-80 flex-col border-r border-white/8 bg-[#1f222c]/95 backdrop-blur-xl">
+      <div className="flex items-center justify-between border-b border-white/8 p-4">
         <h2 className="text-lg font-semibold text-white">Elements</h2>
         <Button
           variant="ghost"
           size="icon"
           onClick={() => onCollapsedChange(true)}
-          className="text-gray-400 hover:text-white"
+          className="text-gray-400 hover:bg-white/5 hover:text-white"
         >
           <CaretLeft size={20} />
         </Button>

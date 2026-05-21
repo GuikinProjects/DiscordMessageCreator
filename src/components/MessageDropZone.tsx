@@ -21,7 +21,6 @@ export function MessageDropZone({
 }: MessageDropZoneProps) {
   const isMobile = useIsMobile();
   const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -50,7 +49,6 @@ export function MessageDropZone({
 
       // Don't move if dropping in the same position
       if (draggedIndex === targetIndex || draggedIndex === targetIndex - 1) {
-        setDraggedBlockId(null);
         setDropTargetIndex(null);
         setIsDraggingOver(false);
         return;
@@ -79,7 +77,6 @@ export function MessageDropZone({
       onBlocksChange(newBlocks);
     }
 
-    setDraggedBlockId(null);
     setDropTargetIndex(null);
     setIsDraggingOver(false);
   };
@@ -89,14 +86,12 @@ export function MessageDropZone({
   };
 
   const handleBlockDragStart = (e: React.DragEvent, blockId: string) => {
-    setDraggedBlockId(blockId);
     setIsDraggingOver(true);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("blockId", blockId);
   };
 
   const handleBlockDragEnd = () => {
-    setDraggedBlockId(null);
     setDropTargetIndex(null);
     setIsDraggingOver(false);
   };
@@ -189,8 +184,8 @@ export function MessageDropZone({
   }, [blocks]);
 
   const cardClasses = [
-    "p-6 min-h-[400px] transition-all",
-    isDraggingOver ? "border-primary border-2 bg-primary/5" : "",
+    "min-h-[400px] rounded-[28px] border border-white/8 bg-[#1f222c]/90 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.28)] transition-all backdrop-blur",
+    isDraggingOver ? "border-cyan-400/60 bg-cyan-400/6 ring-2 ring-cyan-400/20" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -203,25 +198,51 @@ export function MessageDropZone({
       onDrop={handleDrop}
     >
       <div className="space-y-4">
-        {blocks.length > 0 && (
-          <div className="flex items-center justify-end mb-2">
-            <Button variant="ghost" size="sm" onClick={handleClearAll}>
-              Clear All
-            </Button>
+        <div className="flex flex-col gap-4 border-b border-white/8 pb-5 md:flex-row md:items-center md:justify-between">
+          <h2 className="text-base font-semibold uppercase tracking-[0.18em] text-slate-300">
+            Canvas
+          </h2>
+          <div className="flex flex-wrap gap-2 text-xs text-slate-200">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+              {blocks.length} active block{blocks.length === 1 ? "" : "s"}
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+              {authors.length} available author{authors.length === 1 ? "" : "s"}
+            </span>
+            {blocks.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={handleClearAll} className="h-auto rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-slate-200 hover:bg-white/10 hover:text-white">
+                Clear All
+              </Button>
+            )}
           </div>
-        )}
+        </div>
 
         {blocks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed rounded-lg">
-            <Plus className="mb-2 text-muted-foreground" size={48} />
-            <p className="text-muted-foreground">
+          <div className="flex h-[420px] flex-col items-center justify-center rounded-[24px] border border-dashed border-white/12 bg-gradient-to-b from-white/[0.04] to-transparent px-6 text-center">
+            <div className="mb-5 rounded-full border border-white/10 bg-white/5 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+              <Plus className="text-cyan-300" size={42} />
+            </div>
+            <p className="text-lg font-medium text-white">
               {isMobile
-                ? "Tap the menu button to add items"
-                : "Drag and drop items from the panel"}
+                ? "Open the menu and tap a block to start composing"
+                : "Drag a block from the sidebar to start composing"}
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Start by adding an author, then message content
-            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-2 text-xs text-slate-200">
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                1. Add author
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                2. Add message
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                3. Review preview
+              </span>
+            </div>
+            {authors.length === 0 && (
+              <Button className="mt-6 rounded-full bg-cyan-500 px-5 text-slate-950 hover:bg-cyan-400" onClick={onOpenAuthorDialog}>
+                Create first author
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
